@@ -1,4 +1,7 @@
 ## 模拟new实现
+
+本文测试环境：node v13.1.0
+
 我对new的理解：
 >对一个函数(fn)一顿操作之后，返回一个对象(obj)
 
@@ -35,12 +38,13 @@ console.log(
 结果
 
 ![](../images/实现new运算符/第一版-1.jpg)
+
 第一版完成。
 
 ---
 Next
 
-在被new操作的函数里返回对象是会覆盖掉原来的对象 示例：
+在构造函数里返回对象会覆盖掉原来的对象 示例：
 ```javascript
 function Person(name) {
     this.name = name;
@@ -86,10 +90,65 @@ console.log(
 );
 ```
 
-结果
+结果都返回了显式返回的数据
 
 ![](../images/实现new运算符/第二版-1.jpg)
 
-到这就算结束了
+---
+Next
+
+最后还有点问题
+
+- 缺少错误提示，如果使用者给fn传入的一个非方法需要给出错误提示。
+- `typeof null` 会返回 `"object"`。
+- `typeof function(){}` 会返回 `"function"`。
+
+#### 第三版
+关于includes的用法：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+```javascript
+function myNew(fn, ...args) {
+    if (typeof fn !== "function")
+        throw "第一个参数需要传入一个function";
+
+    const obj = {};
+    //  连接原型链
+    Object.setPrototypeOf(obj, fn.prototype)
+    const res = fn.apply(obj, args);
+
+    //  判断 null 不能用宽松相等因为 undefined == null // true
+    return res !== null && ["object", "function"].includes(typeof(res))
+    ?   res : obj;
+};
+```
+
+测试：
+
+```javascript
+function Person(name) {
+    this.name = name;
+    return null;
+};
+
+function Person1(name) {
+    this.name = name;
+    return function() {};
+};
+
+console.log(
+    new Person("zzh"),
+    myNew(Person, "zzh"),
+
+    new Person1("zzh"),
+    myNew(Person1, "zzh"),
+);
+```
+
+结果：
+
+![](../images/实现new运算符/第三版-1.jpg)
+
+--END--
+
+
 
 
