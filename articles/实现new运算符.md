@@ -30,14 +30,15 @@ console.log(
 );
 ```
 
-可以看到控制台中返回了一个对象。
-- 带有一个属性name字段的
-- __proto__上有show方法。
-- __proto__的contructor指向了person构造函数。
 
 结果
 
 ![](../images/实现new运算符/第一版-1.jpg)
+
+可以看到控制台中返回了一个对象。
+- 带有一个属性name字段的
+- __proto__上有show方法。
+- __proto__的contructor指向了person构造函数。
 
 第一版完成。
 
