@@ -1,6 +1,6 @@
 ## 模拟new实现
 
-本文测试环境：node v13.1.0
+测试环境：node v13.1.0
 
 我对new的理解：
 >对一个函数(fn)一顿操作之后，返回一个对象(obj)
@@ -8,7 +8,7 @@
 ---
 
 #### 第一版
-实现思路：用apply把对象this挂到函数里
+实现思路：用apply方法把对象this挂到函数里
 ```javascript
 function myNew(fn, ...args) {
     const obj = {};
@@ -36,16 +36,16 @@ console.log(
 ![](../images/实现new运算符/第一版-1.jpg)
 
 可以看到控制台中返回了一个对象。
-- 带有一个属性name字段的
-- __proto__上有show方法。
-- __proto__的contructor指向了person构造函数。
+- 有一个name属性
+- 原型链有show方法。
+- 原型链的contructor指向了person构造函数。
 
 第一版完成。
 
 ---
 Next
 
-在构造函数里返回对象会覆盖掉原来的对象 示例：
+发现在构造函数里返回对象会覆盖掉原来的对象 示例：
 ```javascript
 function Person(name) {
     this.name = name;
@@ -91,7 +91,7 @@ console.log(
 );
 ```
 
-结果都返回了显式返回的数据
+结果都返回了 函数中显式返回的数据
 
 ![](../images/实现new运算符/第二版-1.jpg)
 
@@ -100,9 +100,9 @@ Next
 
 最后还有点问题
 
-- 缺少错误提示，如果使用者给fn传入的一个非方法需要给出错误提示。
-- `typeof null` 会返回 `"object"`。
-- `typeof function(){}` 会返回 `"function"`。
+1. 缺少错误提示，如果使用者给fn传入的一个非方法需要给出错误提示。
+2. `typeof null` 会返回 `"object"`。
+3. `typeof function(){}` 会返回 `"function"`。
 
 #### 第三版
 关于includes的用法：[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
@@ -135,6 +135,7 @@ function Person1(name) {
     return function() {};
 };
 
+//  与原版比较
 console.log(
     new Person("zzh"),
     myNew(Person, "zzh"),
