@@ -26,30 +26,46 @@ setInterval(() => {
 })(zzh);
 
 // es5
-((zzh) => {
-    function myCall() {
-        //  这四行 取出 context和fn
-        arguments.shift = [].shift;
-        const context = arguments.shift();
-        const fn = arguments.shift();
-        delete arguments.shift;
+Function.prototype.myCall = function(context) {
+    const loan = Symbol("loan");
+    context = context || window;
+    context[loan] = this;
 
-        context.fn = fn;
-        let args = [];
-
-        for (let i = 0, argLen = arguments.length; i < argLen; i++)
-            args.push(`arguments[${i}]`);
-
-        const req = eval(`context.fn(${args})`);
-        delete context.fn;
-        return req;
-
+    const args = [];
+    for (let i = 1; i < arguments.length; i++) {
+        args.push("arguments[" + i + "]");
     }
-    myCall({ n: "f" }, zzh, "zh", 18);
-})(zzh);
 
-function zzh(name, age) {
-    this.name = name;
-    this.age = age;
-    console.log(this);
+    const result = eval("context[loan](" + args + ")");
+    delete context[loan];
+    return result;
 }
+
+Function.prototype.myApply = function(context, args) {
+    const loan = Symbol("loan");
+    context = context || window;
+    context[loan] = this;
+
+    let result;
+    if (!args) {
+        result = context[loan]();
+    } else {
+        const rests = [];
+        for (let i = 0; i < args.length; i++) {
+            rests.push("args[" + i + "]");
+        };
+        result = eval("context[loan](" + rests + ")");
+    }
+
+    delete context[loan];
+    return result;
+}
+
+function zzh(a, b) {
+    console.log(a, b, this.c)
+}
+
+zzh.myCall({ c: 3 }, 1, 2)
+zzh.myCall({ c: 3 })
+zzh.myApply({ c: 3 }, [1, 2])
+zzh.myApply({ c: 3 })

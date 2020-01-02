@@ -1,5 +1,5 @@
 setInterval(() => {
-    
+
 }, 10000);
 
 function myPromise(executor) {
@@ -52,4 +52,4 @@ new myPromise(resolve => {
     setTimeout(resolve.bind(null, 1), 1000);
 }).then(data => {
     console.log(data);
-}) 
+})
