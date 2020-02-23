@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<script>
+    function towBinding(obj, key, callback) {
+        let middle;
+        Object.defineProperty(obj, key, {
+            get() {
+                return middle;
+            },
+            set(value) {
+                middle = value;
+                callback(value);
+            }
+        })
+    };
+    const obj = {};
+    window.addEventListener("load", e => {
+
+        const $test = document.querySelector("#test");
+        const $txt = document.querySelector("#txt");
+
+        towBinding(obj, "txt", value => {
+            $test.value = value
+            $txt.innerText = value;
+        });
+
+        $test.addEventListener("input", e => {
+            const val = $test.value;
+            obj.txt = val;
+        })
+    });
+</script>
+
+<body>
+    <input type="text" id="test">
+    <div id="txt" />
+</body>
+
+</html>

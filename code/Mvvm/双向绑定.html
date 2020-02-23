@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<script>
+    /**
+     * 监听
+     */
+    let observer = function(obj) {
+        /**
+         *  跑起来
+         * @param {obj} 对象的属性
+         */
+        function run(obj) {
+            // console.log(data)
+            const keys = Object.keys(obj);
+            keys.forEach(key => handle(obj, key, obj[key]));
+        };
+
+        /**
+         * 监听每个传入的 属性
+         */
+        function handle(obj, key, value) {
+            observer(value);
+            const dep = new Dep();
+            Object.defineProperty(obj, key, {
+                get() {
+                    console.log(`get${key}:${value}`);
+                    if (Dep.target) {
+                        dep.addSub(Dep.target);
+                    };
+                    return value;
+                },
+                set(val) {
+                    if (val === value) {
+                        return;
+                    };
+                    value = val;
+                    console.log(`set${key}:${value}`);
+                    dep.notify();
+                }
+            })
+        };
+
+        observer = function(obj) {
+            if (!obj || typeof obj !== "object") {
+                return;
+            }
+            run(obj);
+            return obj;
+        }
+        return observer(obj);
+    };
+
+    /**
+     *  订阅器
+     */
+    function Dep() {
+        this.clientList = []
+    }
+    Dep.prototype = {
+        addSub(client) {
+            this.clientList.push(client);
+        },
+        notify() {
+            this.clientList.forEach(client => {
+                client.update();
+            });
+        }
+    }
+    Dep.target = null;
+
+    /**
+     * 订阅者
+     */
+    function Watcher(vm, exp, cb) {
+        this.vm = vm;
+        this.exp = exp;
+        this.cb = cb;
+        this.value = this.get();
+    };
+
+    Watcher.prototype = {
+        update() {
+            this.run();
+        },
+        run() {
+            const value = this.vm.data[this.exp];
+            const oldValue = this.value;
+
+            if (value !== oldValue) {
+                this.value = value;
+                this.cb.call(this.vm, value, oldValue);
+            }
+        },
+        get() {
+            Dep.target = this;
+            const value = this.vm.data[this.exp];
+            Dep.target = null;
+            return value;
+        }
+    }
+
+
+    function SelfVue(data, el, exp, cb) {
+        this.data = data;
+
+        Object.keys(data).forEach(key => {
+            this.proxyKeys(key);
+        })
+
+        observer(data);
+        el.innerText = this.data[exp];
+        new Watcher(this, exp, cb)
+        return this
+    }
+
+    SelfVue.prototype = {
+        proxyKeys(key) {
+            Object.defineProperty(this, key, {
+                enumerable: false,
+                get() {
+                    return this.data[key];
+                },
+                set(value) {
+                    this.data[key] = value;
+                }
+            })
+        }
+    }
+
+    window.addEventListener("load", e => {
+        const $test = document.querySelector("#test");
+        const $txt = document.querySelector("#txt");
+
+        selfVue = new SelfVue({
+                name: ""
+            },
+            $txt,
+            "name",
+            value => {
+                $test.value = value;
+                $txt.innerText = value;
+            }
+        );
+
+        $test.addEventListener("input", e => {
+            selfVue.name = $test.value;
+        })
+    })
+</script>
+
+<body>
+    <input type="text" id="test">
+    <div id="txt"></div>
+</body>
+
+</html>

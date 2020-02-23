@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 setTimeout(() => {
 
 }, 11000);
@@ -48,7 +47,7 @@ function zzh(name, age) {
 }
 zzh.show = Function();
 zzh.prototype.hh = Function();
-=======
+
 setInterval(() => {
 
 }, 10000);
@@ -78,4 +77,3 @@ function zzh(name, age) {
 zzh.prototype.show = function() {
 
 }
->>>>>>> 1a6faca6d5e99258a999e4cbf1eb1272947e4874

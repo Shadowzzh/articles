@@ -35,7 +35,6 @@ Function.prototype.myCall = function(context) {
     for (let i = 1; i < arguments.length; i++) {
         args.push("arguments[" + i + "]");
     }
-
     const result = eval("context[loan](" + args + ")");
     delete context[loan];
     return result;

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+
+<script>
+    window.addEventListener("load", e => {
+        app = new Vue({
+            el: "#parent",
+            data: {
+                message: "hello"
+            }
+        })
+    })
+</script>
+
+<body>
+    <div id="parent">
+        <input type="text" id="text" v-model="message">
+        <div id="repeat">{{ message }}</div>
+    </div>
+
+</body>
+
+</html>

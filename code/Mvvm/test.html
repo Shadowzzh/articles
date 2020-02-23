@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<script>
+    let observer = function(obj) {
+
+        function run(obj) {
+            const keys = Object.keys(obj);
+            keys.forEach(key => handle(obj, key, obj[key]));
+        };
+
+        function handle(obj, key, value) {
+            observer(value);
+            const dep = new Dep();
+            Object.defineProperty(obj, key, {
+                get() {
+                    console.log(`get:${value}`)
+                    if (Dep.target) {
+                        dep.addClient(Dep.target);
+                    }
+                    return value;
+                },
+                set(val) {
+                    if (val === value) {
+                        return;
+                    };
+                    value = val;
+                    dep.notify();
+                    console.log(`set:${value}`)
+                }
+            })
+        };
+
+        observer = function(obj) {
+            if (!obj || typeof obj !== "object") {
+                return obj;
+            }
+            run(obj);
+            return obj;
+        };
+        return observer(obj);
+    };
+
+    function Dep() {
+        this.clientList = [];
+    };
+    Dep.target = null;
+    Dep.prototype = {
+        addClient(client) {
+            this.clientList.push(client);
+        },
+        notify() {
+            console.log(this.clientList)
+            this.clientList.forEach(client => client.update());
+        }
+    };
+
+    function Watcher(vm, exp, cb) {
+        this.vm = vm;
+        this.exp = exp;
+        this.cb = cb;
+        this.value = this.get();
+
+    };
+    Watcher.prototype = {
+        run() {
+            this.update();
+        },
+        update() {
+            const value = this.vm.data[this.exp];
+            const oldVlaue = this.value;
+            if (value !== oldVlaue) {
+                this.value = value;
+                this.cb.call(this, value, oldVlaue);
+            };
+        },
+        get() {
+            Dep.target = this;
+            const target = this.vm.data[this.exp];
+            Dep.target = null;
+            return target;
+        }
+    }
+
+
+    function SelfVue(data, el, exp, cb) {
+        this.data = data;
+
+        Object.keys(data).forEach(key => {
+            this.proxyKeys(key);
+        })
+
+        observer(data);
+        new Watcher(this, exp, cb)
+        return this
+    }
+
+    SelfVue.prototype = {
+        proxyKeys(key) {
+            Object.defineProperty(this, key, {
+                enumerable: false,
+                get() {
+                    return this.data[key];
+                },
+                set(value) {
+                    this.data[key] = value;
+                }
+            })
+        }
+    }
+
+    window.addEventListener("load", e => {
+        const $test = document.querySelector("#test");
+        const $txt = document.querySelector("#txt");
+
+        selfVue = new SelfVue({
+                name: ""
+            },
+            $txt,
+            "name",
+            value => {
+                $test.value = value;
+                $txt.innerText = value;
+            }
+        );
+
+        $test.addEventListener("input", e => {
+            selfVue.name = $test.value;
+        })
+    })
+</script>
+
+<body>
+    <input type="text" id="test">
+    <div id="txt" />
+</body>
+
+</html>
